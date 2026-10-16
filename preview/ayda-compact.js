@@ -100,6 +100,8 @@
     if(!state.unit)return;
     if(!["learn","video","practice"].includes(tab))return;
     if(state.tab==="video"&&tab!=="video")stopHiddenVideos();
+    // Selecting "Alıştırma" always opens the question sets, not the optional homework screen.
+    if(tab==="practice"&&state.stage==="skills")state.stage="sets";
     state.tab=tab;
     safeWrite("tab-"+state.unit,tab);
     render();
