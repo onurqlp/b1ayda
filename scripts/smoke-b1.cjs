@@ -59,11 +59,27 @@ const timeout=ms=>new Promise(r=>setTimeout(r,ms));
   });
   await page.$eval(".unitCard button",node=>node.click());
   await page.waitForSelector("#aydaCompactDock:not([hidden])",{timeout:12000});
+  await page.waitForSelector("#aydaInlinePath");
+  assert.equal(await page.$eval("#aydaInlinePath [data-ayda-inline-tab]",els=>els.length),3,
+    "In-page Learn, Video, Practice buttons must be present.");
+  assert.ok(await page.$eval("#aydaInlinePath",e=>getComputedStyle(e).display!=="none"),
+    "In-page navigation must be visible without using the fixed bottom bar.");
   assert.ok(await page.$eval(".detailPage .explanation",e=>getComputedStyle(e).display!=="none"),"Learn tab must show full grammar.");
   assert.ok(await page.$eval(".detailPage .videoLesson",e=>getComputedStyle(e).display==="none"),"Learn tab should not show video.");
   assert.ok(await page.$eval(".detailPage .ayda-extra",e=>!!e),"Additional B1 explanation not visible in DOM.");
-  await page.$eval('[data-ayda-tab-button="video"]',b=>b.click());
+  // The visible in-page "İlerle" button opens the video without the fixed dock.
+  await page.$eval("#aydaInlineNext",b=>b.click());
+  await page.waitForFunction(()=>document.body.dataset.aydaTab==="video");
   assert.ok(await page.$eval(".detailPage .videoLesson",e=>getComputedStyle(e).display!=="none"),"Video tab is hidden.");
+  // In-video inline CTA leads directly to practice and preserves the video iframe.
+  await page.$eval('[data-ayda-actions="video"] [data-ayda-inline-action="practice"]',b=>b.click());
+  await page.waitForFunction(()=>document.body.dataset.aydaTab==="practice");
+  assert.ok(await page.$eval(".detailPage .activityRunner",e=>getComputedStyle(e).display!=="none"),"Inline practice CTA must work.");
+  await page.$eval('[data-ayda-inline-tab="learn"]',b=>b.click());
+  await page.waitForFunction(()=>document.body.dataset.aydaTab==="learn");
+  await page.$eval('[data-ayda-inline-tab="video"]',b=>b.click());
+  assert.ok(await page.$eval(".detailPage .videoLesson",e=>getComputedStyle(e).display!=="none"),
+    "In-page video button must work.");
   assert.equal(await page.$$eval(".videoFrame iframe",a=>a.length),1,"Embedded video missing.");
   await page.$eval('[data-ayda-tab-button="practice"]',b=>b.click());
   const groupSize=()=>page.$$eval(".runnerSteps button",a=>a.filter(e=>getComputedStyle(e).display!=="none").length);
@@ -72,6 +88,11 @@ const timeout=ms=>new Promise(r=>setTimeout(r,ms));
   await page.$eval('[data-ayda-set-button="2"]',b=>b.click());
   await page.waitForFunction(()=>document.querySelector(".runnerSteps button.active")?.textContent?.trim()==="7");
   assert.equal(await groupSize(),6,"Second set should also have 6 questions.");
+  await page.$eval("#aydaInlineNext",b=>b.click());
+  await page.waitForFunction(()=>document.querySelector(".runnerSteps button.active")?.textContent?.trim()==="8");
+  assert.ok(await page.$eval("#aydaInlineWhere",e=>e.textContent.includes("Soru 2/6")),
+    "In-page progress label must update to current question.");
+  await page.$eval(".runnerSteps button:nth-child(7)",b=>b.click());
   await page.$eval('[data-ayda-set-button="3"]',b=>b.click());
   await page.waitForFunction(()=>document.querySelector(".runnerSteps button.active")?.textContent?.trim()==="13");
   await page.$eval('[data-ayda-set-button="skills"]',b=>b.click());
@@ -99,8 +120,10 @@ const timeout=ms=>new Promise(r=>setTimeout(r,ms));
     const label=document.querySelector(".detailPage .unitNumber")?.textContent||"";
     return Number(label.match(/\d+/)?.[0])===id;
    },{},i);
-   assert.equal(await page.$$eval(".detailPage .runnerSteps button",els=>els.length),24,
+   assert.equal(await page.$eval(".detailPage .runnerSteps button",els=>els.length),24,
     "Unit "+i+" must retain its 24 exercises");
+   assert.equal(await page.$eval("#aydaInlinePath",els=>els.length),1,
+    "Unit "+i+" must have one compact inline navigation (no duplicates).");
    assert.ok(await page.$(".detailPage .explanation"),"Unit "+i+" has no explanation");
    assert.ok(await page.$(".detailPage .videoLesson"),"Unit "+i+" has no video");
    assert.ok(await page.$(".detailPage .readingSection"),"Unit "+i+" has no reading");
@@ -132,6 +155,7 @@ const timeout=ms=>new Promise(r=>setTimeout(r,ms));
   assert.deepEqual(errors,[],"Uncaught errors: "+errors.join("; "));
   console.log("PASS — 24 units × 24 exercises, inline video, grammar, reading, writing, speaking.");
   console.log("PASS — three tabs, four six-question sets, skills stage, local resume, mobile viewport.");
+  console.log("PASS — in-page video, practice, continue and footer actions work on mobile.");
  }finally{
   await page.close();await browser.close();
  }
