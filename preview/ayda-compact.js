@@ -10,6 +10,7 @@
   const state = { unit:null, tab:"learn", stage:"sets", group:1, restorePending:false, currentStep:0 };
   let refreshQueued=false;
   const SET_SIZE=6, QUESTION_TOTAL=24;
+  const SET_NAMES=["Temeli kavra","Kullan ve anlat","Kontrol et","Üret ve özetle"];
   const safeRead=(key)=>{try{return localStorage.getItem(PREFIX+key)}catch{return null}};
   const safeWrite=(key,value)=>{try{localStorage.setItem(PREFIX+key,String(value))}catch{}};
   const create=(tag,props={},text)=>{
@@ -58,7 +59,8 @@
     const savedTab=safeRead("tab-"+id);
     state.tab=["learn","video","practice"].includes(savedTab)?savedTab:"learn";
     state.stage="sets";
-    let index=Number(safeRead("step-"+id));
+    const storedStep=safeRead("step-"+id);
+    let index=storedStep===null?NaN:Number(storedStep);
     if(!Number.isInteger(index)||index<0||index>=QUESTION_TOTAL){
       const complete=new Set(savedCorrect());
       index=Array.from({length:QUESTION_TOTAL},(_,n)=>n).find(n=>!complete.has("u"+id+"a"+(n+1)))??23;
@@ -191,7 +193,7 @@
           const group=Number(key), start=(group-1)*SET_SIZE;
           const count=finished.filter(index=>index>=start&&index<start+SET_SIZE).length;
           button.textContent=count===6?"✓ "+key:key;
-          button.title="Set "+key+": "+count+"/6 tamamlandı";
+          button.title="Set "+key+" · "+SET_NAMES[group-1]+": "+count+"/6 tamamlandı";
         }
       });
       if(state.stage==="skills"){
@@ -201,7 +203,8 @@
         const count=finished.filter(index=>index>=start&&index<start+SET_SIZE).length;
         const step=state.currentStep-start+1;
         $("#aydaCompactSetSummary",dock).textContent=
-          "Set "+state.group+"/4 · Soru "+Math.max(1,Math.min(6,step))+"/6 · "+count+" doğru";
+          count===6?"✓ "+SET_NAMES[state.group-1]+" tamamlandı · Sonraki sete geçebilirsin":
+          "Set "+state.group+"/4 · "+SET_NAMES[state.group-1]+" · Soru "+Math.max(1,Math.min(6,step))+"/6 · "+count+"/6 doğru";
       }
     }
     $("#aydaCompactNote",dock).textContent=
