@@ -131,6 +131,8 @@ const timeout=ms=>new Promise(r=>setTimeout(r,ms));
     const label=document.querySelector(".detailPage .unitNumber")?.textContent||"";
     return Number(label.match(/\d+/)?.[0])===id;
    },{},i);
+   // React paints the unit first; compact controls arrive on the next animation frame.
+   await page.waitForSelector(".detailPage #aydaInlinePath",{timeout:8000});
    assert.equal(await page.$eval(".detailPage .runnerSteps",el=>el.querySelectorAll("button").length),24,
     "Unit "+i+" must retain its 24 exercises");
    assert.equal(await page.$eval(".detailPage",el=>el.querySelectorAll("#aydaInlinePath").length),1,
