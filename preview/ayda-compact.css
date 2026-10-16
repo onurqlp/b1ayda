@@ -122,3 +122,85 @@ body.ayda-compact-active[data-ayda-tab="practice"] #aydaLearnerTools{bottom:248p
 @media(prefers-reduced-motion:reduce){
   #aydaCompactProgressBar{transition:none}
 }
+
+
+/* Minimal, always-visible lesson navigation within the content itself. */
+body.ayda-compact-active #aydaInlinePath{
+  width:min(1000px,calc(100% - 36px));
+  margin:14px auto 0;
+  padding:14px 16px 12px;
+  border:1px solid #dce3eb;
+  border-radius:16px;
+  box-shadow:0 5px 18px #1228500c;
+  background:#ffffff;color:#152d45;
+}
+.ayda-inline-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.ayda-inline-title strong{font-size:14px;letter-spacing:-.01em;font-weight:850}
+.ayda-inline-title span{font-size:12px;color:#667c91}
+.ayda-inline-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.ayda-inline-tabs button{
+  min-width:0;min-height:47px;padding:8px 6px;
+  border-radius:10px;border:1px solid #d6e0ea;
+  background:#f8fafc;color:#30465b;font-size:13px;
+  font-weight:800;cursor:pointer
+}
+.ayda-inline-tabs button:hover{background:#edf3f8}
+.ayda-inline-tabs button.active,
+.ayda-inline-tabs button[aria-pressed="true"]{
+  background:#102541;border-color:#102541;color:#fff
+}
+.ayda-inline-continue{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px}
+.ayda-inline-continue span{font-size:12px;color:#587083}
+#aydaInlinePath button:focus-visible,
+.ayda-inline-actions button:focus-visible{outline:3px solid #b48b37;outline-offset:3px}
+#aydaInlinePath .ayda-inline-primary,.ayda-inline-actions .ayda-inline-primary{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:45px;padding:9px 17px;
+  border-radius:10px;border:1px solid #102541;
+  background:#102541;color:#fff;font-size:13px;font-weight:850;
+  cursor:pointer;white-space:nowrap
+}
+#aydaInlinePath .ayda-inline-primary:hover,.ayda-inline-actions .ayda-inline-primary:hover{
+  background:#193b5c
+}
+.ayda-inline-actions{
+  display:none;align-items:center;justify-content:flex-end;flex-wrap:wrap;
+  gap:9px;margin:17px 0 0;padding-top:13px;border-top:1px solid #e3e9ef
+}
+.ayda-inline-actions .ayda-inline-secondary{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:9px 12px;min-height:45px;
+  background:#f7f9fc;border:1px solid #d9e3ed;
+  border-radius:10px;color:#294661;font-size:13px;font-weight:750;
+  cursor:pointer
+}
+.ayda-inline-actions .ayda-inline-secondary:hover{background:#ebf1f7}
+body.ayda-compact-active[data-ayda-tab="learn"] .ayda-inline-actions[data-ayda-actions="learn"],
+body.ayda-compact-active[data-ayda-tab="video"] .ayda-inline-actions[data-ayda-actions="video"],
+body.ayda-compact-active[data-ayda-tab="practice"][data-ayda-stage="sets"] .ayda-inline-actions[data-ayda-actions="practice"],
+body.ayda-compact-active[data-ayda-tab="practice"][data-ayda-stage="skills"] .ayda-inline-actions[data-ayda-actions="skills"]{
+  display:flex
+}
+body.ayda-compact-active .detailPage .ayda-inline-actions[data-ayda-actions="skills"]{
+  width:min(1000px,calc(100% - 36px));margin:12px auto 25px;
+  padding:14px 0
+}
+@media(max-width:620px){
+  body.ayda-compact-active #aydaInlinePath{
+    width:calc(100% - 26px);margin-top:10px;
+    padding:11px 11px 10px;border-radius:13px
+  }
+  .ayda-inline-title{margin-bottom:8px}
+  .ayda-inline-title strong{font-size:13px}
+  .ayda-inline-title span{font-size:11px;text-align:right}
+  .ayda-inline-tabs{gap:5px}
+  .ayda-inline-tabs button{min-height:45px;font-size:11.5px;line-height:1.25;padding:8px 3px}
+  .ayda-inline-continue{margin-top:9px;gap:8px}
+  .ayda-inline-continue span{font-size:11px;line-height:1.2}
+  #aydaInlinePath .ayda-inline-primary{min-height:43px;font-size:12px;padding:8px 11px;white-space:normal;text-align:center}
+  .ayda-inline-actions{gap:7px;justify-content:stretch}
+  .ayda-inline-actions button{flex:1 1 auto}
+  .ayda-inline-actions .ayda-inline-primary,
+  .ayda-inline-actions .ayda-inline-secondary{font-size:12px;padding:8px 9px;white-space:normal;text-align:center}
+  body.ayda-compact-active .detailPage .ayda-inline-actions[data-ayda-actions="skills"]{width:calc(100% - 26px)}
+}
