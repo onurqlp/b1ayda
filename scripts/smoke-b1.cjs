@@ -108,6 +108,20 @@ const timeout=ms=>new Promise(r=>setTimeout(r,ms));
    await page.$eval(".detailPage .backButton",b=>b.click());
    await page.waitForSelector(".unitCard");
   }
+  // Older students already have progress saved by the original platform.
+  // A fresh compact session must resume from the first uncompleted exercise.
+  await page.evaluate(()=>{
+   const key="ayda-b1-progress";
+   const progress=JSON.parse(localStorage.getItem(key)||'{"correct":[],"writing":[],"speaking":[],"lastUnit":24}');
+   progress.correct=[...new Set([...(progress.correct||[]),...Array.from({length:6},(_,i)=>"u24a"+(i+1))])];
+   localStorage.setItem(key,JSON.stringify(progress));
+   localStorage.removeItem("ayda-b1-compact-v1:step-24");
+  });
+  await page.$eval(".unitCard:nth-child(24) button",b=>b.click());
+  await page.waitForFunction(()=>document.querySelector(".runnerSteps button.active")?.textContent?.trim()==="7");
+  await page.$eval(".detailPage .backButton",b=>b.click());
+  await page.waitForSelector(".unitCard");
+
   assert.deepEqual(errors,[],"Uncaught errors: "+errors.join("; "));
   console.log("PASS — 24 units × 24 exercises, inline video, grammar, reading, writing, speaking.");
   console.log("PASS — three tabs, four six-question sets, skills stage, local resume, mobile viewport.");
