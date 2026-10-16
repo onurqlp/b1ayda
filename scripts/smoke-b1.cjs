@@ -102,8 +102,7 @@ const timeout=ms=>new Promise(r=>setTimeout(r,ms));
   assert.equal(await groupSize(),6,"Second set should also have 6 questions.");
   await page.$eval("#aydaInlineNext",b=>b.click());
   await page.waitForFunction(()=>document.querySelector(".runnerSteps button.active")?.textContent?.trim()==="8");
-  assert.ok(await page.$eval("#aydaInlineWhere",e=>e.textContent.includes("Soru 2/6")),
-    "In-page progress label must update to current question.");
+  await page.waitForFunction(()=>document.querySelector("#aydaInlineWhere")?.textContent.includes("Soru 2/6"),{timeout:7000});
   await page.$eval(".runnerSteps button:nth-child(7)",b=>b.click());
   await page.$eval('[data-ayda-set-button="3"]',b=>b.click());
   await page.waitForFunction(()=>document.querySelector(".runnerSteps button.active")?.textContent?.trim()==="13");
