@@ -117,8 +117,15 @@ const timeout=ms=>new Promise(r=>setTimeout(r,ms));
    localStorage.setItem(key,JSON.stringify(progress));
    localStorage.removeItem("ayda-b1-compact-v1:step-24");
   });
+  // Reload exactly as a returning student would: React imports the stored progress on startup.
+  await page.reload({waitUntil:"domcontentloaded"});
+  await page.waitForSelector(".unitCard");
+  await page.evaluate(()=>{
+   document.getElementById("aydaLoginBox").style.display="none";
+   document.getElementById("aydaProtectedContent").style.display="block";
+  });
   await page.$eval(".unitCard:nth-child(24) button",b=>b.click());
-  await page.waitForFunction(()=>document.querySelector(".runnerSteps button.active")?.textContent?.trim()==="7");
+  await page.waitForFunction(()=>document.querySelector(".runnerSteps button.active")?.textContent?.trim()==="7",{timeout:12000});
   await page.$eval(".detailPage .backButton",b=>b.click());
   await page.waitForSelector(".unitCard");
 
