@@ -86,7 +86,19 @@ const timeout=ms=>new Promise(r=>setTimeout(r,ms));
   assert.equal(await groupSize(),6,"Only six question numbers should be visible in a set.");
   assert.equal(await page.$$eval(".runnerSteps button",a=>a.length),24,"Original 24 exercises must stay in the DOM.");
   await page.$eval('[data-ayda-set-button="2"]',b=>b.click());
-  await page.waitForFunction(()=>document.querySelector(".runnerSteps button.active")?.textContent?.trim()==="7");
+  await page.waitForFunction(()=>document.querySelector(".runnerSteps button.active")?.textContent?.trim()==="7",{timeout:5000})
+    .catch(async err=>{
+      console.error("SET TWO DIAGNOSTIC",await page.evaluate(()=>({
+        active:document.querySelector(".runnerSteps button.active")?.textContent,
+        allButtons:document.querySelectorAll(".runnerSteps button").length,
+        bodyState:{...document.body.dataset},
+        dock:document.querySelector("#aydaCompactSetSummary")?.textContent,
+        inline:document.querySelector("#aydaInlineWhere")?.textContent,
+        visible:document.querySelector(".activityRunner")?.getBoundingClientRect().height,
+        inner:document.querySelector(".runnerCard")?.textContent?.slice(0,160)
+      })),errors);
+      throw err;
+    });
   assert.equal(await groupSize(),6,"Second set should also have 6 questions.");
   await page.$eval("#aydaInlineNext",b=>b.click());
   await page.waitForFunction(()=>document.querySelector(".runnerSteps button.active")?.textContent?.trim()==="8");
