@@ -60,7 +60,7 @@ const timeout=ms=>new Promise(r=>setTimeout(r,ms));
   await page.$eval(".unitCard button",node=>node.click());
   await page.waitForSelector("#aydaCompactDock:not([hidden])",{timeout:12000});
   await page.waitForSelector("#aydaInlinePath");
-  assert.equal(await page.$eval("#aydaInlinePath [data-ayda-inline-tab]",els=>els.length),3,
+  assert.equal(await page.$eval("#aydaInlinePath",element=>element.querySelectorAll("[data-ayda-inline-tab]").length),3,
     "In-page Learn, Video, Practice buttons must be present.");
   assert.ok(await page.$eval("#aydaInlinePath",e=>getComputedStyle(e).display!=="none"),
     "In-page navigation must be visible without using the fixed bottom bar.");
