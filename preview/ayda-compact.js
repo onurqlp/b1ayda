@@ -200,7 +200,7 @@
   function updateInlineControls(){
     const panel=$("#aydaInlinePath");
     if(!panel)return;
-    $("[data-ayda-inline-tab]",panel).forEach(button=>{
+    Array.from(panel.querySelectorAll("[data-ayda-inline-tab]")).forEach(button=>{
       const active=button.dataset.aydaInlineTab===state.tab;
       button.setAttribute("aria-pressed",String(active));
       button.classList.toggle("active",active);
