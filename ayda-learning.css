@@ -289,3 +289,6 @@ body {background:var(--ayda-cream);font-family:-apple-system,BlinkMacSystemFont,
 @media (prefers-reduced-motion:reduce) {
  *,*:before,*:after {scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
+
+/* Preserve the original visible AYDA wordmark if a separately verified official logo asset is unavailable. */
+.brandMark:not([data-ayda-logo="1"]) {width:38px;height:38px;background:var(--ayda-navy);border-radius:10px;font-size:18px!important;line-height:38px}
