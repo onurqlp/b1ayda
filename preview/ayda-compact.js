@@ -123,6 +123,110 @@
     render();
     scrollToSection();
   }
+  // In-page controls supplement the fixed menu: students can navigate even if
+  // they never notice the bottom navigation or use a laptop.
+  function nextStep(){
+    if(!state.unit)return;
+    if(state.tab==="learn"){openTab("video");return}
+    if(state.tab==="video"){openTab("practice");return}
+    if(state.stage==="skills"){$(".detailPage .backButton")?.click();return}
+    const index=selectedIndex();
+    if(index>=QUESTION_TOTAL-1){selectSet("skills");return}
+    if(index>=0){
+      setCurrentQuestion(index+1);
+      scrollToSection();
+    }else selectSet(1);
+  }
+  function actionButton(text,action,primary=false){
+    const button=create("button",{type:"button",class:primary?"ayda-inline-primary":"ayda-inline-secondary","data-ayda-inline-action":action},text);
+    button.addEventListener("click",()=>{
+      switch(action){
+        case "video": openTab("video");break;
+        case "learn": openTab("learn");break;
+        case "practice": openTab("practice");break;
+        case "skills": selectSet("skills");break;
+        case "home": $(".detailPage .backButton")?.click();break;
+        case "next": nextStep();break;
+      }
+    });
+    return button;
+  }
+  function createInPageActions(kind,target,location="append"){
+    if(!target||$('[data-ayda-actions="'+kind+'"]'))return;
+    const foot=create("nav",{class:"ayda-inline-actions","data-ayda-actions":kind,"aria-label":"Dersin sonraki adımı"});
+    if(kind==="learn"){
+      foot.append(actionButton("▶ Videoyu izle","video",true),actionButton("Doğrudan alıştırma →","practice"));
+    }else if(kind==="video"){
+      foot.append(actionButton("Alıştırmalara geç →","practice",true),actionButton("Konuya dön","learn"));
+    }else if(kind==="practice"){
+      foot.append(actionButton("Sonraki soru →","next",true),actionButton("▶ Videoya dön","video"));
+    }else if(kind==="skills"){
+      foot.append(actionButton("✓ Üniteyi bitir · Ünitelere dön","home",true),actionButton("Alıştırmaları tekrar et","practice"));
+    }
+    if(location==="after")target.insertAdjacentElement("afterend",foot);
+    else target.append(foot);
+  }
+  function ensureInlineControls(){
+    const hero=$(".detailPage .unitHero");
+    if(!hero)return;
+    if(!$("#aydaInlinePath")){
+      const panel=create("section",{id:"aydaInlinePath",class:"ayda-inline-path","aria-label":"Bu ünitenin çalışma adımları"});
+      const title=create("div",{class:"ayda-inline-title"});
+      title.append(
+        create("strong",{},"Bu ünitede"),
+        create("span",{},"İstediğin bölümden başlayabilirsin.")
+      );
+      const tabs=create("nav",{class:"ayda-inline-tabs","aria-label":"Sayfa içi bölüm seçimi"});
+      [["learn","① Konu anlatımı"],["video","▶ Video izle"],["practice","✎ Alıştırmalar"]].forEach(([tab,label])=>{
+        const button=create("button",{type:"button","data-ayda-inline-tab":tab,"aria-pressed":"false"},label);
+        button.addEventListener("click",()=>openTab(tab));
+        tabs.append(button);
+      });
+      const bottom=create("div",{class:"ayda-inline-continue"});
+      const where=create("span",{id:"aydaInlineWhere"},"Konu anlatımı");
+      const next=actionButton("İlerle →","next",true);
+      next.id="aydaInlineNext";
+      bottom.append(where,next);
+      panel.append(title,tabs,bottom);
+      hero.insertAdjacentElement("afterend",panel);
+    }
+    createInPageActions("learn",$(".detailPage .explanationBody"));
+    createInPageActions("video",$(".detailPage .videoLesson"));
+    createInPageActions("practice",$(".detailPage .activityRunner"));
+    createInPageActions("skills",$(".detailPage .unitCheck"),"after");
+  }
+  function updateInlineControls(){
+    const panel=$("#aydaInlinePath");
+    if(!panel)return;
+    $("[data-ayda-inline-tab]",panel).forEach(button=>{
+      const active=button.dataset.aydaInlineTab===state.tab;
+      button.setAttribute("aria-pressed",String(active));
+      button.classList.toggle("active",active);
+    });
+    let current,nextLabel;
+    if(state.tab==="learn"){
+      current="Şu an: Konu anlatımı";
+      nextLabel="Videoya ilerle →";
+    }else if(state.tab==="video"){
+      current="Şu an: Ünite videosu";
+      nextLabel="Alıştırmalara ilerle →";
+    }else if(state.stage==="skills"){
+      current="Şu an: Okuma, yazma ve konuşma";
+      nextLabel="Ünitelere dön →";
+    }else{
+      current="Şu an: Set "+state.group+"/4 · Soru "+Math.max(1,Math.min(6,state.currentStep%SET_SIZE+1))+"/6";
+      nextLabel=state.currentStep===23?"Ünite görevlerine geç →":"Sonraki soruya ilerle →";
+    }
+    const where=$("#aydaInlineWhere",panel);
+    const next=$("#aydaInlineNext",panel);
+    if(where&&where.textContent!==current)where.textContent=current;
+    if(next&&next.textContent!==nextLabel)next.textContent=nextLabel;
+    const practiceNext=$('[data-ayda-actions="practice"] [data-ayda-inline-action="next"]');
+    if(practiceNext){
+      const label=state.currentStep===23?"Ünite görevlerine geç →":"Sonraki soru →";
+      if(practiceNext.textContent!==label)practiceNext.textContent=label;
+    }
+  }
   function createDock(){
     const dock=create("section",{id:"aydaCompactDock",hidden:"","aria-label":"AYDA B1 ünite öğrenme menüsü"});
     const head=create("div",{class:"ayda-compact-head"});
@@ -207,6 +311,7 @@
           "Set "+state.group+"/4 · "+SET_NAMES[state.group-1]+" · Soru "+Math.max(1,Math.min(6,step))+"/6 · "+count+"/6 doğru";
       }
     }
+    updateInlineControls();
     $("#aydaCompactNote",dock).textContent=
       state.tab==="learn"?"Konuyu öğren veya hatırla; istersen doğrudan alıştırmaya geç.":
       state.tab==="video"?"Videoyu sayfadan ayrılmadan izle; ihtiyacın yoksa geç.":
@@ -230,6 +335,7 @@
       }
       safeWrite("step-"+id,active);
     }
+    ensureInlineControls();
     render();
   }
   function scheduleRefresh(){
