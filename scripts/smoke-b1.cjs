@@ -131,9 +131,9 @@ const timeout=ms=>new Promise(r=>setTimeout(r,ms));
     const label=document.querySelector(".detailPage .unitNumber")?.textContent||"";
     return Number(label.match(/\d+/)?.[0])===id;
    },{},i);
-   assert.equal(await page.$eval(".detailPage .runnerSteps button",els=>els.length),24,
+   assert.equal(await page.$eval(".detailPage .runnerSteps",el=>el.querySelectorAll("button").length),24,
     "Unit "+i+" must retain its 24 exercises");
-   assert.equal(await page.$eval("#aydaInlinePath",els=>els.length),1,
+   assert.equal(await page.$eval(".detailPage",el=>el.querySelectorAll("#aydaInlinePath").length),1,
     "Unit "+i+" must have one compact inline navigation (no duplicates).");
    assert.ok(await page.$(".detailPage .explanation"),"Unit "+i+" has no explanation");
    assert.ok(await page.$(".detailPage .videoLesson"),"Unit "+i+" has no video");
