@@ -31,5 +31,7 @@ function mount(){
 let pending=false;
 const observer=new MutationObserver(()=>{if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;mount()})});
 observer.observe(document.getElementById("root")||document.body,{childList:true,subtree:true});
+const gate=document.getElementById("aydaProtectedContent");
+if(gate)observer.observe(gate,{attributes:true,attributeFilter:["style","class"]});
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",mount,{once:true});else mount();
 })();
